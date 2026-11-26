@@ -1077,6 +1077,9 @@ h1 .hl {
 }
 .footer-logo { font-size: 11px; font-weight: 800; letter-spacing: .16em; }
 .footer-copy { font-size: 12px; color: var(--texto-suave-oscuro); }
+.footer-credit { font-size: 12px; color: var(--texto-suave-oscuro); }
+.footer-credit a { color: var(--violeta-texto-oscuro); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.footer-credit a:hover { color: var(--blanco); }
 
 @media (max-width: 767px) {
   .footer-inner { padding-bottom: 104px; }
