@@ -1,10 +1,9 @@
-/* Mentoría Meta Ads — Celi Segundo · JavaScript vanilla, sin dependencias */
+/* Mentoría de publicidad digital — Celi Segundo · JavaScript vanilla, sin dependencias */
 (function () {
   'use strict';
 
   var d = document;
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  var isMobile = window.matchMedia('(max-width: 767px)');
 
   function $(sel, ctx) { return (ctx || d).querySelector(sel); }
   function $$(sel, ctx) { return Array.prototype.slice.call((ctx || d).querySelectorAll(sel)); }
@@ -200,70 +199,6 @@
     });
 
     render(false);
-  })();
-
-  /* ---------- 3.8 Test de planes ---------- */
-  (function quiz() {
-    var root = $('[data-quiz]');
-    if (!root) return;
-    var result = $('[data-result]', root);
-    var answers = {};
-    var PLANS = {
-      express: { name: 'Lanzamiento Express', reason: 'Una clase por semana te deja tiempo para practicar cada módulo con calma.' },
-      pro: { name: 'Pro', reason: 'En 4 semanas ves los 8 módulos y el bonus de ventas por WhatsApp.' },
-      vip: { name: 'VIP', reason: 'Sumas sesiones 1 a 1, los dos bonus y un mes de seguimiento con soporte sin límite.' }
-    };
-
-    function evaluate() {
-      if (!answers.ritmo || !answers.vip) return;
-      var key = answers.vip === 'si' ? 'vip' : (answers.ritmo === 'dos' ? 'pro' : 'express');
-      var plan = PLANS[key];
-
-      result.innerHTML = '';
-      var p = d.createElement('p');
-      var strong = d.createElement('strong');
-      strong.textContent = 'Te conviene ' + plan.name + '.';
-      p.appendChild(strong);
-      p.appendChild(d.createTextNode(' ' + plan.reason));
-      result.appendChild(p);
-      replay(p, 'up');
-
-      var target = null;
-      $$('.plan').forEach(function (card) {
-        var on = card.getAttribute('data-plan') === key;
-        card.classList.toggle('is-reco', on);
-        if (on) target = card;
-      });
-      if (target && isMobile.matches) {
-        target.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'center' });
-      }
-    }
-
-    $$('[role="radiogroup"]', root).forEach(function (group) {
-      var radios = $$('[role="radio"]', group);
-      var q = group.getAttribute('data-q');
-
-      function choose(radio, focus) {
-        radios.forEach(function (r) {
-          var on = r === radio;
-          r.setAttribute('aria-checked', on ? 'true' : 'false');
-          r.tabIndex = on ? 0 : -1;
-        });
-        if (focus) radio.focus();
-        answers[q] = radio.getAttribute('data-value');
-        evaluate();
-      }
-
-      radios.forEach(function (radio, i) {
-        radio.addEventListener('click', function () { choose(radio, false); });
-        radio.addEventListener('keydown', function (e) {
-          var n = null;
-          if (e.key === 'ArrowRight' || e.key === 'ArrowDown') n = (i + 1) % radios.length;
-          else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') n = (i - 1 + radios.length) % radios.length;
-          if (n !== null) { e.preventDefault(); choose(radios[n], true); }
-        });
-      });
-    });
   })();
 
   /* ---------- 3.9 Acordeón ---------- */
