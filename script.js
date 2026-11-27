@@ -226,20 +226,21 @@
     });
 
     var els = $$('.reveal');
+    // Aviso al <head> de que el JS llegó hasta acá (ver el respaldo de 2,5 s en index.html)
+    window.celiReady = true;
     if (reduceMotion.matches || !('IntersectionObserver' in window)) {
       els.forEach(function (el) { el.classList.add('is-in'); });
       return;
     }
+    // Se dispara apenas el elemento asoma (incluso un poco antes de entrar en
+    // pantalla), así al scrollear rápido la animación ya está en marcha.
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
         if (!en.isIntersecting) return;
-        // 15% del elemento visible, o 15% de la pantalla cubierta en elementos muy altos
-        if (en.intersectionRatio >= 0.15 || en.intersectionRect.height >= window.innerHeight * 0.15) {
-          en.target.classList.add('is-in');
-          io.unobserve(en.target);
-        }
+        en.target.classList.add('is-in');
+        io.unobserve(en.target);
       });
-    }, { threshold: [0, 0.05, 0.1, 0.15] });
+    }, { threshold: 0, rootMargin: '0px 0px 80px 0px' });
     els.forEach(function (el) { io.observe(el); });
   })();
 
@@ -253,7 +254,33 @@
 
     var pastHero = false;
     var contactVisible = false;
-    function update() { btn.classList.toggle('is-shown', pastHero && !contactVisible); }
+    var plansVisible = false;
+    var faqVisible = false;
+    var mobile = window.matchMedia('(max-width: 639px)');
+    // Se oculta en la portada, en el contacto y mientras se ven los planes
+    // (que ya tienen sus propios botones), para no tapar precios ni botones.
+    // En mobile también en las preguntas frecuentes, donde taparía los "+".
+    function update() {
+      var hide = contactVisible || plansVisible || (faqVisible && mobile.matches);
+      btn.classList.toggle('is-shown', pastHero && !hide);
+    }
+    if (mobile.addEventListener) mobile.addEventListener('change', update);
+
+    var faqSec = d.getElementById('dudas');
+    if (faqSec) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { faqVisible = en.isIntersecting; });
+        update();
+      }).observe(faqSec);
+    }
+
+    var plans = $('#planes .stack--plans');
+    if (plans) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { plansVisible = en.isIntersecting; });
+        update();
+      }).observe(plans);
+    }
 
     new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {

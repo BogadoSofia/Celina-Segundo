@@ -249,6 +249,10 @@ h1 .hl {
   align-items: center;
   min-height: 44px;
 }
+.logo img { display: block; height: 52px; width: auto; }
+@media (max-width: 499px) {
+  .logo img { height: 46px; }
+}
 .nav-right {
   display: flex;
   align-items: center;
@@ -924,6 +928,21 @@ h1 .hl {
 .plan--dark .plan-amount { color: var(--violeta-texto-oscuro); }
 .plan-per { font-size: 14px; color: var(--texto-suave-claro); }
 .plan--dark .plan-per { color: var(--texto-suave-oscuro); }
+/* Total de clases: etiqueta para comparar los planes de un vistazo */
+.plan-total {
+  align-self: flex-start;
+  margin-top: -6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--gris-claro);
+  border: 1px solid var(--linea-clara);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+.plan-total strong { font-weight: 800; color: var(--violeta-texto-claro); }
+.plan--dark .plan-total { background: var(--negro-suave); border-color: var(--linea-oscura); }
+.plan--dark .plan-total strong { color: var(--violeta-texto-oscuro); }
 .plan-list {
   flex-grow: 1;
   display: flex;
@@ -948,6 +967,33 @@ h1 .hl {
   stroke-linejoin: round;
 }
 .plan--dark .plan-list svg { stroke: var(--violeta-texto-oscuro); }
+
+/* Medios de pago: debajo de los planes */
+.pay-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+.pay-title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--violeta-texto-claro);
+}
+.pay-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.pay-list li {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 2px solid var(--negro);
+  background: var(--blanco);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.pay-text { font-size: 14px; color: var(--texto-suave-claro); }
 
 /* Info de plataformas: texto suelto debajo de los planes */
 .platform-info {
@@ -1072,7 +1118,7 @@ h1 .hl {
   line-height: 1.7;
   color: var(--texto-suave-oscuro);
 }
-.faq-item.is-open .faq-a p { animation: up .6s var(--ease) both; }
+.faq-item.is-open .faq-a p { animation: up .35s var(--ease) both; }
 
 /* Estatua de la cabeza abierta: sentada sobre el borde inferior de la sección */
 .statue--faq {
@@ -1137,7 +1183,7 @@ h1 .hl {
   flex-wrap: wrap;
   gap: 12px;
 }
-.footer-logo { font-size: 11px; font-weight: 800; letter-spacing: .16em; }
+.footer-logo { display: block; height: 44px; width: auto; }
 .footer-copy { font-size: 12px; color: var(--texto-suave-oscuro); }
 .footer-credit { font-size: 12px; color: var(--texto-suave-oscuro); }
 .footer-credit a { color: var(--violeta-texto-oscuro); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
@@ -1172,9 +1218,31 @@ h1 .hl {
 .float-cta.is-shown { opacity: 1; visibility: visible; transform: none; }
 .float-cta.is-shown:hover { transform: translateY(-2px); background: var(--violeta-texto-oscuro); }
 html:not(.js) .float-cta { opacity: 1; visibility: visible; transform: none; }
+/* Mobile: solo el ícono, en un círculo chico, para no tapar precios ni textos */
+@media (max-width: 639px) {
+  .float-cta {
+    right: 12px;
+    bottom: 12px;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    justify-content: center;
+  }
+  .float-cta .icon-18 { width: 22px; height: 22px; }
+  .float-cta span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
 
 /* ---------- 4. Animaciones ---------- */
-@keyframes up    { from { opacity: 0; transform: translateY(28px) } to { opacity: 1; transform: none } }
+/* Entradas: cortas (≤ .45s) y desde opacidad alta, para que al scrollear rápido
+   nunca se vea un bloque gris o vacío */
+@keyframes up    { from { opacity: .7; transform: translateY(12px) } to { opacity: 1; transform: none } }
 @keyframes flo   {
   0%, 100% { transform: translateY(0) rotate(0) scale(1) }
   50%      { transform: translateY(-34px) rotate(20deg) scale(1.08) }
@@ -1191,14 +1259,14 @@ html:not(.js) .float-cta { opacity: 1; visibility: visible; transform: none; }
 /* Aparición al hacer scroll: usa la propiedad `translate` para no pisar
    los `transform` de .lift, .is-reco y demás estados. */
 @keyframes wave  { to { transform: translateX(-100px) } }
-@keyframes rise  { from { opacity: 0; translate: 0 28px } to { opacity: 1; translate: none } }
+@keyframes rise  { from { opacity: .7; translate: 0 12px } to { opacity: 1; translate: none } }
 
-.up    { animation: up .9s cubic-bezier(.2, .7, .2, 1) both; }
-.d1 { animation-delay: .15s; }
-.d2 { animation-delay: .3s; }
-.d3 { animation-delay: .45s; }
-.d4 { animation-delay: .6s; }
-.d5 { animation-delay: .75s; }
+.up    { animation: up .45s var(--ease) both; }
+.d1 { animation-delay: .05s; }
+.d2 { animation-delay: .1s; }
+.d3 { animation-delay: .15s; }
+.d4 { animation-delay: .2s; }
+.d5 { animation-delay: .25s; }
 .flo   { animation: flo 5s ease-in-out infinite; }
 .cube--2.flo { animation-delay: -2s; }
 .cube--3.flo { animation-delay: -4s; }
@@ -1209,12 +1277,12 @@ html:not(.js) .float-cta { opacity: 1; visibility: visible; transform: none; }
 
 .js .reveal,
 .js .reveal .stagger > *,
-.js .reveal.stagger > * { opacity: 0; translate: 0 28px; }
-.js .reveal.is-in { animation: rise .9s var(--ease) both; }
+.js .reveal.stagger > * { opacity: .7; translate: 0 12px; }
+.js .reveal.is-in { animation: rise .4s var(--ease) both; }
 .js .reveal.is-in .stagger > *,
 .js .reveal.is-in.stagger > * {
-  animation: rise .9s var(--ease) both;
-  animation-delay: calc(.15s + var(--i, 0) * 80ms);
+  animation: rise .4s var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
 }
 
 /* ---------- Movimiento reducido ---------- */
