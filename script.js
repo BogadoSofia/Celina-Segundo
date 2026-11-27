@@ -27,11 +27,12 @@
     img.addEventListener('load', function () { box.classList.remove('is-missing'); });
   });
 
-  /* ---------- 3.3 Pestañas ---------- */
-  (function tabs() {
-    var list = $('[role="tablist"]');
-    if (!list) return;
+  /* ---------- Pestañas (3.3 ¿Es para ti? y 3.5 Programa por plataforma) ---------- */
+  $$('[role="tablist"]').forEach(function (list) {
     var tabsEls = $$('[role="tab"]', list);
+    // Si la lista indica un destino, ese texto cambia con la pestaña (el nombre de la plataforma en el título)
+    var nameSel = list.getAttribute('data-name-target');
+    var nameEl = nameSel ? $(nameSel) : null;
 
     function select(tab, focus) {
       if (tab.getAttribute('aria-selected') === 'true') { if (focus) tab.focus(); return; }
@@ -43,6 +44,7 @@
         panel.hidden = !on;
         if (on) replay(panel, 'up');
       });
+      if (nameEl && tab.getAttribute('data-name')) nameEl.textContent = tab.getAttribute('data-name');
       if (focus) tab.focus();
     }
 
@@ -57,149 +59,7 @@
         if (n !== null) { e.preventDefault(); select(tabsEls[n], true); }
       });
     });
-  })();
-
-  /* ---------- 3.5 Carrusel ---------- */
-  (function carousel() {
-    var root = $('[data-carousel]');
-    if (!root) return;
-    var viewport = $('.car-viewport', root);
-    var track = $('.car-track', root);
-    var cards = $$('.mod', track);
-    var dotsWrap = $('[data-dots]', root);
-    var live = $('[data-live]', root);
-    var prevBtn = $('[data-prev]');
-    var nextBtn = $('[data-next]');
-    var total = cards.length;
-    var index = 0;
-    var base = 0;
-
-    var dots = cards.map(function (card, i) {
-      var b = d.createElement('button');
-      b.type = 'button';
-      b.className = 'car-dot';
-      b.setAttribute('aria-label', 'Ir a ' + card.getAttribute('data-title'));
-      b.setAttribute('aria-controls', 'car-track');
-      b.addEventListener('click', function () { go(i); });
-      dotsWrap.appendChild(b);
-      return b;
-    });
-
-    function gap() {
-      var g = parseFloat(window.getComputedStyle(track).columnGap);
-      return isNaN(g) ? 20 : g;
-    }
-    function offsetFor(i) {
-      var step = cards[0].offsetWidth + gap();
-      // Nunca se desplaza más allá del final: así no queda espacio vacío a la derecha.
-      var max = Math.max(0, track.scrollWidth - viewport.clientWidth);
-      return Math.min(i * step, max);
-    }
-
-    function render(announce) {
-      base = -offsetFor(index);
-      track.style.transform = 'translateX(' + base + 'px)';
-      cards.forEach(function (c, i) { c.classList.toggle('is-active', i === index); });
-      dots.forEach(function (b, i) {
-        var on = i === index;
-        b.classList.toggle('is-active', on);
-        if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
-      });
-      prevBtn.setAttribute('aria-disabled', index === 0 ? 'true' : 'false');
-      if (announce) {
-        live.textContent = 'Módulo ' + (index + 1) + ' de ' + total + ': ' + cards[index].getAttribute('data-title');
-      }
-    }
-
-    function go(i) {
-      var n = Math.max(0, Math.min(total - 1, i));
-      if (n === index) { render(false); return; }
-      index = n;
-      render(true);
-    }
-    function prev() { if (index > 0) go(index - 1); }
-    function next() { go(index + 1 >= total ? 0 : index + 1); }
-
-    prevBtn.addEventListener('click', prev);
-    nextBtn.addEventListener('click', next);
-
-    // Clic en una tarjeta: la vuelve activa (salvo que venga de un arrastre)
-    var suppressClick = false;
-    cards.forEach(function (card, i) {
-      $('.mod-hit', card).addEventListener('click', function () {
-        if (suppressClick) { suppressClick = false; return; }
-        go(i);
-      });
-    });
-
-    // Teclado: flechas cuando el foco está dentro del carrusel o en sus controles
-    function onKey(e) {
-      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
-      else if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
-      else if (e.key === 'Home') { e.preventDefault(); go(0); }
-      else if (e.key === 'End') { e.preventDefault(); go(total - 1); }
-    }
-    root.addEventListener('keydown', onKey);
-    prevBtn.addEventListener('keydown', onKey);
-    nextBtn.addEventListener('keydown', onKey);
-
-    // Swipe táctil y arrastre con mouse (Pointer Events)
-    var THRESHOLD = 40;
-    var drag = null;
-
-    viewport.addEventListener('pointerdown', function (e) {
-      if (e.pointerType === 'mouse' && e.button !== 0) return;
-      suppressClick = false;
-      drag = { id: e.pointerId, x: e.clientX, y: e.clientY, dx: 0, moved: false };
-    });
-
-    window.addEventListener('pointermove', function (e) {
-      if (!drag || e.pointerId !== drag.id) return;
-      var dx = e.clientX - drag.x;
-      var dy = e.clientY - drag.y;
-      if (!drag.moved) {
-        if (Math.abs(dx) < 6 || Math.abs(dx) < Math.abs(dy)) {
-          if (Math.abs(dy) > 10) drag = null; // gesto vertical: se deja scrollear
-          return;
-        }
-        drag.moved = true;
-        viewport.classList.add('is-dragging');
-        track.classList.add('no-anim');
-      }
-      drag.dx = dx;
-      // Resistencia en los extremos
-      var resist = (index === 0 && dx > 0) || (index === total - 1 && dx < 0) ? 0.35 : 1;
-      track.style.transform = 'translateX(' + (base + dx * resist) + 'px)';
-    });
-
-    function endDrag(e, cancelled) {
-      if (!drag || e.pointerId !== drag.id) return;
-      var moved = drag.moved;
-      var dx = drag.dx;
-      drag = null;
-      viewport.classList.remove('is-dragging');
-      track.classList.remove('no-anim');
-      if (!moved) return;
-      suppressClick = true;
-      if (!cancelled && dx <= -THRESHOLD && index < total - 1) go(index + 1);
-      else if (!cancelled && dx >= THRESHOLD && index > 0) go(index - 1);
-      else render(false);
-    }
-    window.addEventListener('pointerup', function (e) { endDrag(e, false); });
-    window.addEventListener('pointercancel', function (e) { endDrag(e, true); });
-    viewport.addEventListener('dragstart', function (e) { e.preventDefault(); });
-
-    // Recalcular en resize sin animar
-    var rt;
-    window.addEventListener('resize', function () {
-      track.classList.add('no-anim');
-      render(false);
-      clearTimeout(rt);
-      rt = setTimeout(function () { track.classList.remove('no-anim'); }, 120);
-    });
-
-    render(false);
-  })();
+  });
 
   /* ---------- 3.9 Acordeón ---------- */
   (function faq() {
@@ -255,24 +115,9 @@
     var pastHero = false;
     var contactVisible = false;
     var plansVisible = false;
-    var faqVisible = false;
-    var mobile = window.matchMedia('(max-width: 639px)');
-    // Se oculta en la portada, en el contacto y mientras se ven los planes
-    // (que ya tienen sus propios botones), para no tapar precios ni botones.
-    // En mobile también en las preguntas frecuentes, donde taparía los "+".
-    function update() {
-      var hide = contactVisible || plansVisible || (faqVisible && mobile.matches);
-      btn.classList.toggle('is-shown', pastHero && !hide);
-    }
-    if (mobile.addEventListener) mobile.addEventListener('change', update);
-
-    var faqSec = d.getElementById('dudas');
-    if (faqSec) {
-      new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) { faqVisible = en.isIntersecting; });
-        update();
-      }).observe(faqSec);
-    }
+    // Se oculta en la portada, en el contacto y mientras se ve el precio
+    // (que ya tiene sus propios botones). En mobile no se muestra nunca (ver CSS).
+    function update() { btn.classList.toggle('is-shown', pastHero && !contactVisible && !plansVisible); }
 
     var plans = $('#planes .stack--plans');
     if (plans) {
