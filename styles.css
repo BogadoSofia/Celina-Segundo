@@ -848,7 +848,11 @@ h1 .hl {
   line-height: 1.3;
   padding: 8px 14px;
   border-radius: 0;
+  text-decoration: none;
+  transition: background .2s, color .2s;
 }
+.badge:hover, .badge:focus-visible { background: var(--negro); color: var(--malva); }
+.badge:focus-visible { outline: 2px solid var(--malva); outline-offset: 3px; }
 
 /* ---------- 3.8 Planes ---------- */
 .stack--plans { gap: 36px; }
